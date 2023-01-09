@@ -166,25 +166,28 @@ def verbose_reports(wordlist, options):
     """
     Report entropy metrics based on word list and requested password size"
     """
+    lengths = []
 
     if options.acrostic:
         worddict = wordlist_to_worddict(wordlist)
         numwords = len(options.acrostic)
-        length = 0
         for char in options.acrostic:
-            length += len(worddict.get(char, []))
+            lengths.append(len(worddict.get(char, [])))
     else:
-        length = len(wordlist)
         numwords = options.numwords
+        for _ in range(numwords):
+            lengths.append(len(wordlist))
 
-    bits = math.log(length, 2)
+    bits = list(map(lambda length: math.log(length, 2), lengths))
 
-    print("With the current options, your word list contains {0} words."
-          .format(length))
+    print("With the current options, your word lists contain {0} words respectively."
+          .format(str(lengths).strip("[]")))
+
+    bits_display = "+".join(map(lambda b: "{0:.2f}".format(b), bits))
 
     print("A {0} word password from this list will have roughly "
-          "{1} ({2:.2f} * {3}) bits of entropy,"
-          "".format(numwords, int(bits * numwords), bits, numwords))
+          "{1} ({2}) bits of entropy,"
+          "".format(numwords, int(sum(bits)), bits_display))
     print("assuming truly random word selection.\n")
 
 
